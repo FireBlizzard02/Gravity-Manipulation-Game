@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MovementController : MonoBehaviour
 {
@@ -15,6 +18,10 @@ public class MovementController : MonoBehaviour
     private float originalStepOffset;
     private float? lastGroundedTime;
     private float? jumpButtonPressedTime;
+    public float fallThreshold = -15f; 
+    public float fallTime = 7f;     
+    private bool isFalling = false;    
+    private float fallTimer = 0f; 
 
     // Start is called before the first frame update
     void Start()
@@ -82,5 +89,30 @@ public class MovementController : MonoBehaviour
         {
             animator.SetBool("Running", false);
         }
+
+        if (transform.position.y < fallThreshold && !isFalling)
+        {
+            isFalling = true;
+            fallTimer = fallTime;
+        }
+
+        if (isFalling)
+        {
+            fallTimer -= Time.deltaTime;
+
+            if (fallTimer <= 0f)
+            {
+                EndGame(); 
+            }
+        }
+    }
+    void EndGame()
+    {
+        #if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+        #else
+        
+        Application.Quit();
+        #endif
     }
 }
